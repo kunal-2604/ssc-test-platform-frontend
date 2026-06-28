@@ -30,7 +30,8 @@ const Register = () => {
 
     try {
       await register(form);
-      navigate("/student/dashboard");
+      alert("Registration successful. Please verify your email before login.");
+      navigate("/login");
     } catch (error) {
       setError(error.response?.data?.message || "Registration failed");
     } finally {

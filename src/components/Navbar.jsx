@@ -10,44 +10,45 @@ const Navbar = () => {
     navigate("/login");
   };
 
+  if (!user) {
+    return null;
+  }
+
+  const dashboardPath =
+    user.role === "ADMIN" ? "/admin/dashboard" : "/student/dashboard";
+
   return (
     <nav className="navbar">
-      <Link to="/" className="logo">
+      <Link to={dashboardPath} className="logo">
         SSC Test Platform
       </Link>
 
       <div className="nav-links">
-        {!user && (
-          <>
-            <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
-          </>
-        )}
-
-        {user?.role === "STUDENT" && (
+        {user.role === "STUDENT" && (
           <>
             <Link to="/student/dashboard">Dashboard</Link>
-            <Link to="/student/store">Test Series</Link>
+            <Link to="/student/tests">My Tests</Link>
+            <Link to="/student/store">Buy Series</Link>
             <Link to="/student/my-access">My Access</Link>
           </>
         )}
 
-        {user?.role === "ADMIN" && (
+        {user.role === "ADMIN" && (
           <>
             <Link to="/admin/dashboard">Dashboard</Link>
-            <Link to="/admin/modules">Modules</Link>
+            <Link to="/admin/tests">Tests</Link>
+            <Link to="/admin/students">Students</Link>
+            <Link to="/admin/reports">Reports</Link>
             <Link to="/admin/payments">Payments</Link>
-            <Link to="/admin/student-sessions">Sessions</Link>
+            <Link to="/admin/modules">Modules</Link>
           </>
         )}
 
-        {user && (
-          <>
-            <span>{user.name}</span>
-            <span className="role-badge">{user.role}</span>
-            <button onClick={handleLogout}>Logout</button>
-          </>
-        )}
+        <span className="user-name">{user.name}</span>
+        <span className="role-badge">{user.role}</span>
+        <button className="logout-btn" onClick={handleLogout}>
+          Logout
+        </button>
       </div>
     </nav>
   );

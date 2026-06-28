@@ -15,6 +15,22 @@ import AdminModules from "./pages/AdminModules";
 import MyAccess from "./pages/MyAccess";
 import AdminPayments from "./pages/AdminPayments";
 import AdminStudentSessions from "./pages/AdminStudentSessions";
+import AdminTests from "./pages/AdminTests";
+import CreateTest from "./pages/CreateTest";
+import AddQuestions from "./pages/AddQuestions";
+import StudentTests from "./pages/StudentTests";
+import TestInstructions from "./pages/TestInstructions";
+import TestAttempt from "./pages/TestAttempt";
+import TestResult from "./pages/TestResult";
+import AdminTestAttempts from "./pages/AdminTestAttempts";
+import AdminReports from "./pages/AdminReports";
+import AdminResultDetail from "./pages/AdminResultDetail";
+import AdminStudents from "./pages/AdminStudents";
+import AdminStudentDetail from "./pages/AdminStudentDetail";
+import VerifyEmail from "./pages/VerifyEmail";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import ServerWakeUp from "./components/ServerWakeUp";
 
 import "./App.css";
 
@@ -38,6 +54,8 @@ const HomeRedirect = () => {
 
 function App() {
   return (
+    <>
+    <ServerWakeUp />
     <BrowserRouter>
       <AuthProvider>
         <Navbar />
@@ -47,6 +65,10 @@ function App() {
 
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route
             path="/student/dashboard"
@@ -71,6 +93,42 @@ function App() {
             element={
               <RoleRoute allowedRole="STUDENT">
                 <MyAccess />
+              </RoleRoute>
+            }
+          />
+
+          <Route
+            path="/student/tests"
+            element={
+              <RoleRoute allowedRole="STUDENT">
+                <StudentTests />
+              </RoleRoute>
+            }
+          />
+
+          <Route
+            path="/student/tests/:testId/instructions"
+            element={
+              <RoleRoute allowedRole="STUDENT">
+                <TestInstructions />
+              </RoleRoute>
+            }
+          />
+
+          <Route
+            path="/student/attempts/:attemptId"
+            element={
+              <RoleRoute allowedRole="STUDENT">
+                <TestAttempt />
+              </RoleRoute>
+            }
+          />
+
+          <Route
+            path="/student/attempts/:attemptId/result"
+            element={
+              <RoleRoute allowedRole="STUDENT">
+                <TestResult />
               </RoleRoute>
             }
           />
@@ -112,6 +170,78 @@ function App() {
           />
 
           <Route
+            path="/admin/tests"
+            element={
+              <RoleRoute allowedRole="ADMIN">
+                <AdminTests />
+              </RoleRoute>
+            }
+          />
+
+          <Route
+            path="/admin/tests/create"
+            element={
+              <RoleRoute allowedRole="ADMIN">
+                <CreateTest />
+              </RoleRoute>
+            }
+          />
+
+          <Route
+            path="/admin/tests/:testId/questions"
+            element={
+              <RoleRoute allowedRole="ADMIN">
+                <AddQuestions />
+              </RoleRoute>
+            }
+          />
+
+          <Route
+            path="/admin/tests/:testId/attempts"
+            element={
+              <RoleRoute allowedRole="ADMIN">
+                <AdminTestAttempts />
+              </RoleRoute>
+            }
+          />
+
+          <Route
+            path="/admin/reports"
+            element={
+              <RoleRoute allowedRole="ADMIN">
+                <AdminReports />
+              </RoleRoute>
+            }
+          />
+
+          <Route
+            path="/admin/reports/results/:attemptId"
+            element={
+              <RoleRoute allowedRole="ADMIN">
+                <AdminResultDetail />
+              </RoleRoute>
+            }
+          />
+
+          <Route
+            path="/admin/students"
+            element={
+              <RoleRoute allowedRole="ADMIN">
+                <AdminStudents />
+              </RoleRoute>
+            }
+          />
+
+          <Route
+            path="/admin/students/:studentId"
+            element={
+              <RoleRoute allowedRole="ADMIN">
+                <AdminStudentDetail />
+              </RoleRoute>
+            }
+          />
+
+          <Route
             path="/protected"
             element={
               <ProtectedRoute>
@@ -122,6 +252,7 @@ function App() {
         </Routes>
       </AuthProvider>
     </BrowserRouter>
+    </>
   );
 }
 

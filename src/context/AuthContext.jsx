@@ -36,15 +36,7 @@ export const AuthProvider = ({ children }) => {
       deviceId
     });
 
-    localStorage.setItem("accessToken", response.data.accessToken);
-
-    if (response.data.refreshToken) {
-      localStorage.setItem("refreshToken", response.data.refreshToken);
-    }
-
-    setUser(response.data.user);
-
-    return response.data.user;
+    return response.data;
   };
 
   const logout = async () => {
@@ -78,6 +70,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const googleLogin = async (credential) => {
+    const deviceId = getOrCreateDeviceId();
+
+    const response = await api.post("/auth/google", {
+      credential,
+      deviceId
+    });
+
+    localStorage.setItem("accessToken", response.data.accessToken);
+
+    if (response.data.refreshToken) {
+      localStorage.setItem("refreshToken", response.data.refreshToken);
+    }
+
+    setUser(response.data.user);
+
+    return response.data.user;
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
 
@@ -95,7 +106,9 @@ export const AuthProvider = ({ children }) => {
         authLoading,
         login,
         register,
-        logout
+        logout,
+        googleLogin,
+        loadUser
       }}
     >
       {children}

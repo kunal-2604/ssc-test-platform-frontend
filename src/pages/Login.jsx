@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -13,6 +14,15 @@ const Login = () => {
 
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const redirectUser = (user) => {
+    if (user.role === "ADMIN") {
+      navigate("/admin/dashboard");
+    } else {
+      navigate("/student/dashboard");
+    }
+  };
 
   const handleChange = (e) => {
     setForm({
@@ -28,17 +38,35 @@ const Login = () => {
 
     try {
       const user = await login(form.email, form.password);
-
-      if (user.role === "ADMIN") {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/student/dashboard");
-      }
+      redirectUser(user);
     } catch (error) {
       setError(error.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setError("");
+      setGoogleLoading(true);
+
+      if (!credentialResponse.credential) {
+        setError("Google credential not received");
+        return;
+      }
+
+      const user = await googleLogin(credentialResponse.credential);
+      redirectUser(user);
+    } catch (error) {
+      setError(error.response?.data?.message || "Google login failed");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    setError("Google login failed");
   };
 
   return (
@@ -56,6 +84,7 @@ const Login = () => {
           placeholder="Enter email"
           value={form.email}
           onChange={handleChange}
+          required
         />
 
         <label>Password</label>
@@ -65,6 +94,7 @@ const Login = () => {
           placeholder="Enter password"
           value={form.password}
           onChange={handleChange}
+          required
         />
 
         <button type="submit" disabled={loading}>
@@ -72,9 +102,27 @@ const Login = () => {
         </button>
 
         <p className="small-text">
-          New student? <Link to="/register">Create account</Link>
+          <Link to="/forgot-password">Forgot Password?</Link>
         </p>
 
+        <div className="auth-divider">
+          <span>OR</span>
+        </div>
+
+        <div className="google-login-box">
+          {googleLoading ? (
+            <p>Signing in with Google...</p>
+          ) : (
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+            />
+          )}
+        </div>
+
+        <p className="small-text">
+          New student? <Link to="/register">Create account</Link>
+        </p>
       </form>
     </div>
   );
