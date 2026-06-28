@@ -20,7 +20,8 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <Link to={dashboardPath} className="logo">
-        SSC Test Platform
+        <img src="/logo.png" alt="SSC Test Platform" />
+        <span>SSC Test Platform</span>
       </Link>
 
       <div className="nav-links">
