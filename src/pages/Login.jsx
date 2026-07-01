@@ -1,20 +1,21 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
+import toast from "react-hot-toast";
+import { FiEye, FiEyeOff, FiLock, FiMail } from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
+import AuthLayout from "../components/layout/AuthLayout";
+import Button from "../components/ui/Button";
 
 const Login = () => {
   const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    email: "",
-    password: ""
-  });
-
+  const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const redirectUser = (user) => {
     if (user.role === "ADMIN") {
@@ -25,10 +26,7 @@ const Login = () => {
   };
 
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -38,9 +36,12 @@ const Login = () => {
 
     try {
       const user = await login(form.email, form.password);
+      toast.success("Login successful");
       redirectUser(user);
     } catch (error) {
-      setError(error.response?.data?.message || "Login failed");
+      const message = error.response?.data?.message || "Login failed";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -57,74 +58,78 @@ const Login = () => {
       }
 
       const user = await googleLogin(credentialResponse.credential);
+      toast.success("Google login successful");
       redirectUser(user);
     } catch (error) {
-      setError(error.response?.data?.message || "Google login failed");
+      const message = error.response?.data?.message || "Google login failed";
+      setError(message);
+      toast.error(message);
     } finally {
       setGoogleLoading(false);
     }
   };
 
-  const handleGoogleError = () => {
-    setError("Google login failed");
-  };
-
   return (
-    <div className="auth-page">
-      <form className="auth-card" onSubmit={handleSubmit}>
-        <h2>Login</h2>
-        <p>Login to access your tests</p>
+    <AuthLayout title="Welcome back" subtitle="Login to continue your SSC test preparation.">
+      {error && <div className="error-box modern-alert">{error}</div>}
 
-        {error && <div className="error-box">{error}</div>}
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <label>Email address</label>
+        <div className="input-with-icon">
+          <FiMail />
+          <input
+            type="email"
+            name="email"
+            placeholder="Enter email"
+            value={form.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-        <label>Email</label>
-        <input
-          type="email"
-          name="email"
-          placeholder="Enter email"
-          value={form.email}
-          onChange={handleChange}
-          required
-        />
-
-        <label>Password</label>
-        <input
-          type="password"
-          name="password"
-          placeholder="Enter password"
-          value={form.password}
-          onChange={handleChange}
-          required
-        />
-
-        <button type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
-
-        <p className="small-text">
+        <div className="form-label-row">
+          <label>Password</label>
           <Link to="/forgot-password">Forgot Password?</Link>
-        </p>
-
-        <div className="auth-divider">
-          <span>OR</span>
+        </div>
+        <div className="input-with-icon password-input-wrap">
+          <FiLock />
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            placeholder="Enter password"
+            value={form.password}
+            onChange={handleChange}
+            required
+          />
+          <button
+            type="button"
+            className="password-toggle-btn"
+            onClick={() => setShowPassword((prev) => !prev)}
+            aria-label="Toggle password visibility"
+          >
+            {showPassword ? <FiEyeOff /> : <FiEye />}
+          </button>
         </div>
 
-        <div className="google-login-box">
-          {googleLoading ? (
-            <p>Signing in with Google...</p>
-          ) : (
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-            />
-          )}
-        </div>
-
-        <p className="small-text">
-          New student? <Link to="/register">Create account</Link>
-        </p>
+        <Button type="submit" loading={loading} fullWidth size="lg">
+          Login
+        </Button>
       </form>
-    </div>
+
+      <div className="auth-divider"><span>OR</span></div>
+
+      <div className="google-login-box">
+        {googleLoading ? (
+          <p className="google-loading-text">Signing in with Google...</p>
+        ) : (
+          <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => toast.error("Google login failed")} />
+        )}
+      </div>
+
+      <p className="small-text auth-bottom-text">
+        New student? <Link to="/register">Create account</Link>
+      </p>
+    </AuthLayout>
   );
 };
 

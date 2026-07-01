@@ -1,26 +1,22 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { FiEye, FiEyeOff, FiLock, FiMail, FiPhone, FiUser } from "react-icons/fi";
 import { useAuth } from "../context/AuthContext";
+import AuthLayout from "../components/layout/AuthLayout";
+import Button from "../components/ui/Button";
 
 const Register = () => {
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    password: ""
-  });
-
+  const [form, setForm] = useState({ name: "", email: "", phone: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value
-    });
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
@@ -29,69 +25,96 @@ const Register = () => {
     setLoading(true);
 
     try {
-      await register(form);
-      alert("Registration successful. Please verify your email before login.");
+      const response = await register(form);
+      toast.success(response.message || "Registration successful. Verify your email.");
       navigate("/login");
     } catch (error) {
-      setError(error.response?.data?.message || "Registration failed");
+      const message = error.response?.data?.message || "Registration failed";
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="auth-page">
-      <form className="auth-card" onSubmit={handleSubmit}>
-        <h2>Student Register</h2>
-        <p>Create your account to buy and attempt tests</p>
+    <AuthLayout title="Create student account" subtitle="Register once, verify your email, then start practicing.">
+      {error && <div className="error-box modern-alert">{error}</div>}
 
-        {error && <div className="error-box">{error}</div>}
+      <form className="auth-form" onSubmit={handleSubmit}>
+        <label>Full name</label>
+        <div className="input-with-icon">
+          <FiUser />
+          <input
+            type="text"
+            name="name"
+            placeholder="Enter full name"
+            value={form.name}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-        <label>Name</label>
-        <input
-          type="text"
-          name="name"
-          placeholder="Enter full name"
-          value={form.name}
-          onChange={handleChange}
-        />
+        <label>Email address</label>
+        <div className="input-with-icon">
+          <FiMail />
+          <input
+            type="email"
+            name="email"
+            placeholder="Enter email"
+            value={form.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
 
-        <label>Email</label>
-        <input
-          type="email"
-          name="email"
-          placeholder="Enter email"
-          value={form.email}
-          onChange={handleChange}
-        />
-
-        <label>Phone</label>
-        <input
-          type="text"
-          name="phone"
-          placeholder="Enter phone number"
-          value={form.phone}
-          onChange={handleChange}
-        />
+        <label>Phone number</label>
+        <div className="input-with-icon">
+          <FiPhone />
+          <input
+            type="text"
+            name="phone"
+            placeholder="Enter phone number"
+            value={form.phone}
+            onChange={handleChange}
+          />
+        </div>
 
         <label>Password</label>
-        <input
-          type="password"
-          name="password"
-          placeholder="Minimum 6 characters"
-          value={form.password}
-          onChange={handleChange}
-        />
+        <div className="input-with-icon password-input-wrap">
+          <FiLock />
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            placeholder="Minimum 6 characters"
+            value={form.password}
+            onChange={handleChange}
+            required
+            minLength={6}
+          />
+          <button
+            type="button"
+            className="password-toggle-btn"
+            onClick={() => setShowPassword((prev) => !prev)}
+            aria-label="Toggle password visibility"
+          >
+            {showPassword ? <FiEyeOff /> : <FiEye />}
+          </button>
+        </div>
 
-        <button type="submit" disabled={loading}>
-          {loading ? "Creating account..." : "Register"}
-        </button>
-
-        <p className="small-text">
-          Already have an account? <Link to="/login">Login</Link>
-        </p>
+        <Button type="submit" loading={loading} fullWidth size="lg">
+          Create account
+        </Button>
       </form>
-    </div>
+
+      <div className="auth-note-box">
+        Verification email will be sent after registration.
+      </div>
+
+      <p className="small-text auth-bottom-text">
+        Already have an account? <Link to="/login">Login</Link>
+      </p>
+    </AuthLayout>
   );
 };
 

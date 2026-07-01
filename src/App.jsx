@@ -1,4 +1,5 @@
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
@@ -31,6 +32,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ServerWakeUp from "./components/ServerWakeUp";
+import LoadingSpinner from "./components/ui/LoadingSpinner";
 
 import "./App.css";
 
@@ -38,7 +40,7 @@ const HomeRedirect = () => {
   const { user, authLoading } = useAuth();
 
   if (authLoading) {
-    return <h2 style={{ textAlign: "center" }}>Loading...</h2>;
+    return <LoadingSpinner text="Checking your session..." />;
   }
 
   if (!user) {
@@ -52,15 +54,12 @@ const HomeRedirect = () => {
   return <Navigate to="/student/dashboard" replace />;
 };
 
-function App() {
-  return (
-    <>
-    <ServerWakeUp />
-    <BrowserRouter>
-      <AuthProvider>
-        <Navbar />
+const AppRoutes = () => {
+  const location = useLocation();
 
-        <Routes>
+  return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
           <Route path="/" element={<HomeRedirect />} />
 
           <Route path="/login" element={<Login />} />
@@ -249,9 +248,21 @@ function App() {
               </ProtectedRoute>
             }
           />
-        </Routes>
-      </AuthProvider>
-    </BrowserRouter>
+      </Routes>
+    </AnimatePresence>
+  );
+};
+
+function App() {
+  return (
+    <>
+      <ServerWakeUp />
+      <BrowserRouter>
+        <AuthProvider>
+          <Navbar />
+          <AppRoutes />
+        </AuthProvider>
+      </BrowserRouter>
     </>
   );
 }
